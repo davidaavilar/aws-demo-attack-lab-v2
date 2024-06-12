@@ -15,6 +15,17 @@ resource "aws_s3_bucket" "mgt" {
 }
 
 
+resource "aws_s3_bucket_versioning" "mgt" {
+  bucket = aws_s3_bucket.mgt.id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+
+
+
 output "s3_bucket" {
   value = aws_s3_bucket.data.bucket
 }
