@@ -11,5 +11,5 @@ variable "region" {
 }
 
 variable "deployment_name" {
-  default = "cmunoz-eks"
+  default = "prisma-cmunoz-eks"
 }
