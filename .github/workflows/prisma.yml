@@ -2,7 +2,7 @@ name: Deployment aws-demo-attack-lab-v2
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "github" ]
 
 permissions:
   contents: read
