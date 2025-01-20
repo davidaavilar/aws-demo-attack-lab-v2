@@ -11,5 +11,5 @@ variable "region" {
 }
 
 variable "deployment_name" {
-  default = "davila-eks"
+  default = "vxvera-eks"
 }
