@@ -5,13 +5,6 @@ resource "aws_s3_bucket" "data" {
     Name = "${var.deployment_name}-${random_string.unique_id.result}"
   })
 }
-
-
-
-
-
-
-
 output "s3_bucket" {
   value = aws_s3_bucket.data.bucket
 }

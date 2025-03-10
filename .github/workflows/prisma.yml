@@ -8,31 +8,31 @@ permissions:
   contents: read
 
 jobs:
-  # destroy_deployment:
-  #   permissions:
-  #     contents: read
-  #     security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
-  #     actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
-  #   runs-on: ubuntu-24.04
-  #   name: Terraform Deployment
-  #   env:
-  #     working-directory: ./infra
-  #     AWS_REGION: ${{ vars.AWS_REGION }}
-  #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #     S3_BACKEND: ${{ vars.S3_BACKEND }}
-  #     DEPLOYMENT_NAME: ${{ vars.DEPLOYMENT_NAME }}
-  #   outputs:
-  #     KUBE_CONFIG: ${{ steps.step4.outputs.KUBE_CONFIG }}
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: hashicorp/setup-terraform@v3
-  #     - name: Terraform Deployment
-  #       id: init
-  #       working-directory: ${{ env.working-directory }}
-  #       run: |
-  #         terraform init -backend-config="bucket=${{ env.S3_BACKEND }}" -backend-config="region=${{ env.AWS_REGION }}" -backend-config="key=terraform.tfstate"
-  #         terraform destroy --auto-approve
+  destroy_deployment:
+    permissions:
+      contents: read
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+    runs-on: ubuntu-24.04
+    name: Terraform Deployment
+    env:
+      working-directory: ./infra
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      S3_BACKEND: ${{ vars.S3_BACKEND }}
+      DEPLOYMENT_NAME: ${{ vars.DEPLOYMENT_NAME }}
+    outputs:
+      KUBE_CONFIG: ${{ steps.step4.outputs.KUBE_CONFIG }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - name: Terraform Deployment
+        id: init
+        working-directory: ${{ env.working-directory }}
+        run: |
+          terraform init -backend-config="bucket=${{ env.S3_BACKEND }}" -backend-config="region=${{ env.AWS_REGION }}" -backend-config="key=terraform.tfstate"
+          terraform destroy --auto-approve
   # prisma_cloud_code_scan:
   #   permissions:
   #     contents: read
@@ -53,45 +53,45 @@ jobs:
   #         use_enforcement_rules: true
   #         compact: true
   #         quiet: true
-  docker_build_and_push:
-    # needs: prisma_cloud_code_scan
-    permissions:
-      contents: read
-      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
-      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
-    runs-on: ubuntu-24.04
-    name: Docker Build and Push
-    env:
-      IMAGE_NAME: ${{ vars.IMAGE_NAME }}:latest
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ vars.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      - name: Building the Image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./app
-          file: ./app/Dockerfile
-          tags: ${{ env.IMAGE_NAME }}
-          load: true
-      - name: Prisma Cloud image Scan
-        id: image_scan
-        uses: PaloAltoNetworks/prisma-cloud-scan@v1.6.7
-        with:
-          pcc_console_url: ${{ vars.PCC_CONSOLE_URL }}
-          pcc_user: ${{ secrets.PCC_USER }}
-          pcc_pass: ${{ secrets.PCC_PASS }}
-          image_name: ${{ env.IMAGE_NAME }}
-      - name: Docker Push
-        run: docker push ${{ env.IMAGE_NAME }}
+  # docker_build_and_push:
+  #   # needs: prisma_cloud_code_scan
+  #   permissions:
+  #     contents: read
+  #     security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+  #     actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+  #   runs-on: ubuntu-24.04
+  #   name: Docker Build and Push
+  #   env:
+  #     IMAGE_NAME: ${{ vars.IMAGE_NAME }}:latest
+  #   steps:
+  #     - name: Checkout repo
+  #       uses: actions/checkout@v2
+  #     - name: Log in to Docker Hub
+  #       uses: docker/login-action@v3
+  #       with:
+  #         username: ${{ vars.DOCKER_USERNAME }}
+  #         password: ${{ secrets.DOCKER_PASSWORD }}
+  #     - name: Set up QEMU
+  #       uses: docker/setup-qemu-action@v3
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v3
+  #     - name: Building the Image
+  #       uses: docker/build-push-action@v6
+  #       with:
+  #         context: ./app
+  #         file: ./app/Dockerfile
+  #         tags: ${{ env.IMAGE_NAME }}
+  #         load: true
+  #     - name: Prisma Cloud image Scan
+  #       id: image_scan
+  #       uses: PaloAltoNetworks/prisma-cloud-scan@v1.6.7
+  #       with:
+  #         pcc_console_url: ${{ vars.PCC_CONSOLE_URL }}
+  #         pcc_user: ${{ secrets.PCC_USER }}
+  #         pcc_pass: ${{ secrets.PCC_PASS }}
+  #         image_name: ${{ env.IMAGE_NAME }}
+  #     - name: Docker Push
+  #       run: docker push ${{ env.IMAGE_NAME }}
 
   # infra_deployment:
   #   needs: prisma_cloud_code_scan
