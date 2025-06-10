@@ -8,51 +8,51 @@ permissions:
   contents: read
  
 jobs:
-  destroy_deployment:
-    permissions:
-      contents: read
-      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
-      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
-    runs-on: ubuntu-24.04
-    name: Terraform Deployment
-    env:
-      working-directory: ./infra
-      AWS_REGION: ${{ vars.AWS_REGION }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      S3_BACKEND: ${{ vars.S3_BACKEND }}
-      DEPLOYMENT_NAME: ${{ vars.DEPLOYMENT_NAME }}
-    outputs:
-      KUBE_CONFIG: ${{ steps.step4.outputs.KUBE_CONFIG }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: hashicorp/setup-terraform@v3
-      - name: Terraform Deployment
-        id: init
-        working-directory: ${{ env.working-directory }}
-        run: |
-          terraform init -backend-config="bucket=${{ env.S3_BACKEND }}" -backend-config="region=${{ env.AWS_REGION }}" -backend-config="key=terraform.tfstate"
-          terraform destroy --auto-approve
-  # prisma_cloud_code_scan:
+  # destroy_deployment:
   #   permissions:
   #     contents: read
   #     security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
   #     actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
   #   runs-on: ubuntu-24.04
-  #   name: Code Scan with Prisma Cloud
+  #   name: Terraform Deployment
+  #   env:
+  #     working-directory: ./infra
+  #     AWS_REGION: ${{ vars.AWS_REGION }}
+  #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #     S3_BACKEND: ${{ vars.S3_BACKEND }}
+  #     DEPLOYMENT_NAME: ${{ vars.DEPLOYMENT_NAME }}
+  #   outputs:
+  #     KUBE_CONFIG: ${{ steps.step4.outputs.KUBE_CONFIG }}
   #   steps:
-  #     - name: Checkout repo
-  #       uses: actions/checkout@v2
-  #     - name: Run Prisma Cloud 
-  #       id: prisma-cloud
-  #       uses: bridgecrewio/checkov-action@master
-  #       env:
-  #         PRISMA_API_URL: ${{ vars.PRISMA_API_URL }}
-  #       with:
-  #         api-key: ${{ secrets.BC_API_KEY }}
-  #         use_enforcement_rules: true
-  #         compact: true
-  #         quiet: true
+  #     - uses: actions/checkout@v4
+  #     - uses: hashicorp/setup-terraform@v3
+  #     - name: Terraform Deployment
+  #       id: init
+  #       working-directory: ${{ env.working-directory }}
+  #       run: |
+  #         terraform init -backend-config="bucket=${{ env.S3_BACKEND }}" -backend-config="region=${{ env.AWS_REGION }}" -backend-config="key=terraform.tfstate"
+  #         terraform destroy --auto-approve
+  prisma_cloud_code_scan:
+    permissions:
+      contents: read
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+    runs-on: ubuntu-24.04
+    name: Code Scan with Prisma Cloud
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Run Prisma Cloud 
+        id: prisma-cloud
+        uses: bridgecrewio/checkov-action@master
+        env:
+          PRISMA_API_URL: ${{ vars.PRISMA_API_URL }}
+        with:
+          api-key: ${{ secrets.BC_API_KEY }}
+          use_enforcement_rules: true
+          compact: true
+          quiet: true
   # docker_build_and_push:
   #   needs: prisma_cloud_code_scan
   #   permissions:
@@ -93,36 +93,36 @@ jobs:
   #     - name: Docker Push
   #       run: docker push ${{ env.IMAGE_NAME }}
 
-  # infra_deployment:
-  #   needs: prisma_cloud_code_scan
-  #   permissions:
-  #     contents: read
-  #     security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
-  #     actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
-  #   runs-on: ubuntu-24.04
-  #   name: Terraform Deployment
-  #   env:
-  #     working-directory: ./infra
-  #     AWS_REGION: ${{ vars.AWS_REGION }}
-  #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #     S3_BACKEND: ${{ vars.S3_BACKEND }}
-  #     DEPLOYMENT_NAME: ${{ vars.DEPLOYMENT_NAME }}
-  #   outputs:
-  #     KUBE_CONFIG: ${{ steps.step4.outputs.KUBE_CONFIG }}
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: hashicorp/setup-terraform@v3
-  #     - name: Terraform Deployment
-  #       id: init
-  #       working-directory: ${{ env.working-directory }}
-  #       run: |
-  #         terraform init -backend-config="bucket=${{ env.S3_BACKEND }}" -backend-config="region=${{ env.AWS_REGION }}" -backend-config="key=terraform.tfstate"
-  #         terraform apply -auto-approve -var="region=${{ env.AWS_REGION }}" -var="deployment_name=${{ env.DEPLOYMENT_NAME }}"
-  #     - name: Terraform Variables
-  #       working-directory: ${{ env.working-directory }}
-  #       id: step4
-  #       run: echo "KUBE_CONFIG=$(terraform output update_kube_config)" >> $GITHUB_OUTPUT
+  infra_deployment:
+    needs: prisma_cloud_code_scan
+    permissions:
+      contents: read
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+    runs-on: ubuntu-24.04
+    name: Terraform Deployment
+    env:
+      working-directory: ./infra
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      S3_BACKEND: ${{ vars.S3_BACKEND }}
+      DEPLOYMENT_NAME: ${{ vars.DEPLOYMENT_NAME }}
+    outputs:
+      KUBE_CONFIG: ${{ steps.step4.outputs.KUBE_CONFIG }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - name: Terraform Deployment
+        id: init
+        working-directory: ${{ env.working-directory }}
+        run: |
+          terraform init -backend-config="bucket=${{ env.S3_BACKEND }}" -backend-config="region=${{ env.AWS_REGION }}" -backend-config="key=terraform.tfstate"
+          terraform apply -auto-approve -var="region=${{ env.AWS_REGION }}" -var="deployment_name=${{ env.DEPLOYMENT_NAME }}"
+      - name: Terraform Variables
+        working-directory: ${{ env.working-directory }}
+        id: step4
+        run: echo "KUBE_CONFIG=$(terraform output update_kube_config)" >> $GITHUB_OUTPUT
   
   # app_deployment:
   #   needs: [infra_deployment, docker_build_and_push] 
