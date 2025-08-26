@@ -76,7 +76,7 @@ jobs:
           --repo-id "${{github.repository}}" \
           --branch "${{github.ref_name}}" \
           --source "GITHUB_ACTIONS" \
-          --create-repo-if-missing
+          --create-repo-if-missing \
           --output sarif
 
   # docker_build_and_push:
