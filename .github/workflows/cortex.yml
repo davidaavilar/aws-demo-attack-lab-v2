@@ -35,49 +35,49 @@ jobs:
   #       run: |
   #         terraform init -backend-config="bucket=${{ env.S3_BACKEND }}" -backend-config="region=${{ env.AWS_REGION }}" -backend-config="key=terraform.tfstate"
   #         terraform destroy --auto-approve
-  cortex_code_scan:
-    env:
-      CORTEX_API_KEY: ${{secrets.CORTEX_API_KEY}}
-      CORTEX_API_KEY_ID: ${{secrets.CORTEX_API_KEY_ID}}
-      CORTEX_API_URL: https://api-emea-cxsiamp.xdr.eu.paloaltonetworks.com
-    runs-on: ubuntu-latest
+  # cortex_code_scan:
+  #   env:
+  #     CORTEX_API_KEY: ${{secrets.CORTEX_API_KEY}}
+  #     CORTEX_API_KEY_ID: ${{secrets.CORTEX_API_KEY_ID}}
+  #     CORTEX_API_URL: https://api-emea-cxsiamp.xdr.eu.paloaltonetworks.com
+  #   runs-on: ubuntu-latest
 
-    steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v2
+  #   steps:
+  #   - name: Checkout Repository
+  #     uses: actions/checkout@v2
     
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 22
+  #   - name: Set up Node.js
+  #     uses: actions/setup-node@v4
+  #     with:
+  #       node-version: 22
 
-    - name: Verify Node.js Version
-      run: node -v
+  #   - name: Verify Node.js Version
+  #     run: node -v
 
-    - name: Download cortexcli
-      run: |
-        set -x
-        crtx_resp=$(curl "${CORTEX_API_URL}/public_api/v1/unified-cli/releases/download-link?os=linux&architecture=amd64" \
-          -H "x-xdr-auth-id: ${CORTEX_API_KEY_ID}" \
-          -H "Authorization: ${CORTEX_API_KEY}")
-        crtx_url=$(echo $crtx_resp | jq -r ".signed_url")
-        curl -o cortexcli $crtx_url
-        chmod +x cortexcli
-        ./cortexcli --version
+  #   - name: Download cortexcli
+  #     run: |
+  #       set -x
+  #       crtx_resp=$(curl "${CORTEX_API_URL}/public_api/v1/unified-cli/releases/download-link?os=linux&architecture=amd64" \
+  #         -H "x-xdr-auth-id: ${CORTEX_API_KEY_ID}" \
+  #         -H "Authorization: ${CORTEX_API_KEY}")
+  #       crtx_url=$(echo $crtx_resp | jq -r ".signed_url")
+  #       curl -o cortexcli $crtx_url
+  #       chmod +x cortexcli
+  #       ./cortexcli --version
 
-    - name: Run Cortex CLI Code Scan
-      run: |
-        ./cortexcli \
-          --api-base-url "${CORTEX_API_URL}" \
-          --api-key "${CORTEX_API_KEY}" \
-          --api-key-id "${CORTEX_API_KEY_ID}" \
-          code scan \
-          --directory "${{github.workspace}}" \
-          --repo-id "${{github.repository}}" \
-          --branch "${{github.ref_name}}" \
-          --source "GITHUB_ACTIONS" \
-          --create-repo-if-missing \
-          --output "sarif"
+  #   - name: Run Cortex CLI Code Scan
+  #     run: |
+  #       ./cortexcli \
+  #         --api-base-url "${CORTEX_API_URL}" \
+  #         --api-key "${CORTEX_API_KEY}" \
+  #         --api-key-id "${CORTEX_API_KEY_ID}" \
+  #         code scan \
+  #         --directory "${{github.workspace}}" \
+  #         --repo-id "${{github.repository}}" \
+  #         --branch "${{github.ref_name}}" \
+  #         --source "GITHUB_ACTIONS" \
+  #         --create-repo-if-missing \
+  #         --output "sarif"
 
   docker_build_and_push:
     needs: cortex_code_scan
@@ -108,19 +108,9 @@ jobs:
           file: ./app/Dockerfile
           tags: ${{ env.IMAGE_NAME }}
           load: true
-      - name: Prisma Cloud image Scan
-        id: image_scan
-        uses: PaloAltoNetworks/prisma-cloud-scan@v1.6.7
-        with:
-          pcc_console_url: ${{ vars.PCC_CONSOLE_URL }}
-          pcc_user: ${{ secrets.PCC_USER }}
-          pcc_pass: ${{ secrets.PCC_PASS }}
-          image_name: ${{ env.IMAGE_NAME }}
-      - name: Docker Push
-        run: docker push ${{ env.IMAGE_NAME }}
 
   infra_deployment:
-    needs: cortex_code_scan
+    # needs: cortex_code_scan
     permissions:
       contents: read
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
