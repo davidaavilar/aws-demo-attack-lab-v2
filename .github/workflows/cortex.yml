@@ -80,7 +80,7 @@ jobs:
   #         --output "sarif"
 
   docker_build_and_push:
-    needs: cortex_code_scan
+    # needs: cortex_code_scan
     permissions:
       contents: read
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
@@ -163,12 +163,12 @@ jobs:
         env:
           imageName: ${{ vars.IMAGE_NAME }}
           imageTag: "latest"
-      - name: Defender Deployment
-        working-directory: ${{ env.working-directory }}
-        run: |
-          bash -c ${{ env.KUBE_CONFIG }}
-          kubectl create ns twistlock
-          kubectl apply -f daemonset.yaml
+      # - name: Defender Deployment
+      #   working-directory: ${{ env.working-directory }}
+      #   run: |
+      #     bash -c ${{ env.KUBE_CONFIG }}
+      #     kubectl create ns twistlock
+      #     kubectl apply -f daemonset.yaml
       - name: Application Deployment
         working-directory: ${{ env.working-directory }}
         run: |
