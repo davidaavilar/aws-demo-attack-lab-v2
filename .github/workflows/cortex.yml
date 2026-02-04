@@ -74,8 +74,7 @@ jobs:
           --repo-id "${{github.repository}}" \
           --branch "${{github.ref_name}}" \
           --source "GITHUB_ACTIONS" \
-          --create-repo-if-missing \
-          --output "sarif"
+          --create-repo-if-missing
 
   # docker_build_and_push:
   #   # needs: cortex_code_scan
