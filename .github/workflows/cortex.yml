@@ -104,7 +104,7 @@ jobs:
           context: ./app
           file: ./app/Dockerfile
           tags: ${{ env.IMAGE_NAME }}
-          load: true
+          push: true
 
   # infra_deployment:
   #   # needs: cortex_code_scan
