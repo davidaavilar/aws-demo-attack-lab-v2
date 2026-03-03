@@ -13,7 +13,7 @@ module "eks" {
       name           = "${var.deployment_name}-ng1"
       instance_types = ["t3.large"]
 
-      ami_type = "AL2023_x86_64"
+      ami_type = "AL2023_x86_64_STANDARD"
 
       min_size     = 2
       max_size     = 2
