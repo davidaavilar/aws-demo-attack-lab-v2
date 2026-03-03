@@ -130,7 +130,7 @@ jobs:
         id: init
         working-directory: ${{ env.working-directory }}
         run: |
-          terraform init -backend-config="bucket=${{ env.S3_BACKEND }}" -backend-config="region=${{ env.AWS_REGION }}" -backend-config="key=terraform.tfstate"
+          terraform init -upgrade -backend-config="bucket=${{ env.S3_BACKEND }}" -backend-config="region=${{ env.AWS_REGION }}" -backend-config="key=terraform.tfstate"
           terraform apply -auto-approve -var="region=${{ env.AWS_REGION }}" -var="deployment_name=${{ env.DEPLOYMENT_NAME }}"
       - name: Terraform Variables
         working-directory: ${{ env.working-directory }}
