@@ -1,14 +1,14 @@
-# ---
-# apiVersion: v1
-# kind: Namespace
-# metadata:
-#   name: springapp
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: springapp
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: springapp
-  namespace: default
+  namespace: springapp
 spec:
   selector:
     matchLabels:
@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: springapp
-        image: davidaavilar/springapp
+        image: davidaavilar/springapp:cortex
         ports:
         - containerPort: 8080
 
@@ -29,7 +29,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: default
+  namespace: springapp
   name: springapp
   labels:
     name: springapp

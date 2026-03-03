@@ -23,7 +23,6 @@ resource "aws_lambda_function" "analysis_lambda" {
   function_name = "${var.deployment_name}-${random_string.unique_id.result}"
   role          = aws_iam_role.iam_for_lambda.arn
   handler       = "lambda_function_payload.lambda_handler"
-#   layers        = [ "arn:aws:lambda:us-east-1:108863513136:layer:requests-layer:7" ]
 
   source_code_hash = filebase64sha256("${path.root}/resources/lambda_function_payload.py")
 
