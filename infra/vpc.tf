@@ -2,7 +2,7 @@ data "aws_availability_zones" "available" {}
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "6.6.0"
+  version = "~> 6.0"
 
   name = "${var.deployment_name}-${random_string.unique_id.result}"
 
