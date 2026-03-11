@@ -59,9 +59,9 @@ resource "aws_dynamodb_table_item" "customer_1" {
     last_name   = { S = "Avila" }
     email       = { S = "david.avila@example.com" }
     phone       = { S = "+1-555-0101" }
-    pan_masked  = { S = "4012001037141112" }
+    card_number = { S = "4012001037141112" }
     card_token  = { S = "tok_demo_abc123" }
-    cvv_stored  = { BOOL = false }
+    card_cvv    = { S = "467" }
   })
 }
 
@@ -75,9 +75,9 @@ resource "aws_dynamodb_table_item" "customer_2" {
     last_name   = { S = "Gomez" }
     email       = { S = "maria.gomez@example.com" }
     phone       = { S = "+1-555-0102" }
-    pan_masked  = { S = "5123456789012346" }
+    card_number = { S = "5123456789012346" }
     card_token  = { S = "tok_demo_xyz789" }
-    cvv_stored  = { BOOL = false }
+    card_cvv    = { S = "345" }
   })
 }
 
@@ -86,16 +86,16 @@ resource "aws_dynamodb_table_item" "payment_1" {
   hash_key   = aws_dynamodb_table.payments_ondemand.hash_key
 
   item = jsonencode({
-    payment_id    = { S = "pay-001" }
-    customer_id   = { S = "cust-001" }
-    amount        = { N = "150.75" }
-    currency      = { S = "USD" }
-    card_brand    = { S = "VISA" }
-    pan_masked    = { S = "4012001037141112" }
-    card_token    = { S = "tok_demo_abc123" }
-    cardholder    = { S = "David Avila" }
-    cvv_stored    = { BOOL = false }
-    status        = { S = "AUTHORIZED" }
+    payment_id  = { S = "pay-001" }
+    customer_id = { S = "cust-001" }
+    amount      = { N = "150.75" }
+    currency    = { S = "USD" }
+    card_brand  = { S = "VISA" }
+    card_number = { S = "4012001037141112" }
+    card_cvv    = { S = "467" }
+    card_token  = { S = "tok_demo_abc123" }
+    cardholder  = { S = "David Avila" }
+    status      = { S = "AUTHORIZED" }
   })
 }
 
@@ -104,16 +104,34 @@ resource "aws_dynamodb_table_item" "payment_2" {
   hash_key   = aws_dynamodb_table.payments_ondemand.hash_key
 
   item = jsonencode({
-    payment_id    = { S = "pay-002" }
-    customer_id   = { S = "cust-002" }
-    amount        = { N = "89.99" }
-    currency      = { S = "USD" }
-    card_brand    = { S = "MASTERCARD" }
-    pan_masked    = { S = "5123456789012346" }
-    card_token    = { S = "tok_demo_xyz789" }
-    cardholder    = { S = "Maria Gomez" }
-    cvv_stored    = { BOOL = false }
-    status        = { S = "CAPTURED" }
+    payment_id  = { S = "pay-002" }
+    customer_id = { S = "cust-002" }
+    amount      = { N = "89.99" }
+    currency    = { S = "USD" }
+    card_brand  = { S = "MASTERCARD" }
+    card_number = { S = "5123456789012346" }
+    card_cvv    = { S = "345" }
+    card_token  = { S = "tok_demo_xyz789" }
+    cardholder  = { S = "Maria Gomez" }
+    status      = { S = "CAPTURED" }
+  })
+}
+
+resource "aws_dynamodb_table_item" "payment_3" {
+  table_name = aws_dynamodb_table.payments_ondemand.name
+  hash_key   = aws_dynamodb_table.payments_ondemand.hash_key
+
+  item = jsonencode({
+    payment_id  = { S = "pay-003" }
+    customer_id = { S = "cust-002" }
+    amount      = { N = "109.99" }
+    currency    = { S = "USD" }
+    card_brand  = { S = "MASTERCARD" }
+    card_number = { S = "5123456789012346" }
+    card_cvv    = { S = "345" }
+    card_token  = { S = "tok_demo_xyz789" }
+    cardholder  = { S = "Maria Gomez" }
+    status      = { S = "CAPTURED" }
   })
 }
 
