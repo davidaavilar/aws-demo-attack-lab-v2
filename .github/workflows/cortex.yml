@@ -132,9 +132,9 @@ jobs:
       - name: Scan image tar with Cortex CLI
         run: |
           ./cortexcli \
-            --api-base-url "${{ secrets.CORTEX_API_URL }}" \
-            --api-key "${{ secrets.CORTEX_API_KEY }}" \
-            --api-key-id "${{ secrets.CORTEX_API_KEY_ID }}" \
+            --api-base-url "${CORTEX_API_URL}" \
+            --api-key "${CORTEX_API_KEY}" \
+            --api-key-id "${CORTEX_API_KEY_ID}" \
             image scan --archive=true /tmp/image.tar
 
       - name: Build and push image
