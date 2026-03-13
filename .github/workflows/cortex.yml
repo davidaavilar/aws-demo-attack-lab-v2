@@ -77,7 +77,6 @@ jobs:
   #         --create-repo-if-missing
 
 docker_build_scan_and_push:
-  needs: cortex_code_scan
   permissions:
     contents: read
     security-events: write
