@@ -106,6 +106,11 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Install Hyperscan
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libhyperscan5
+
       - name: Build image as tar
         uses: docker/build-push-action@v6
         with:
