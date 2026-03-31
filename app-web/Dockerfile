@@ -3,7 +3,7 @@ FROM davidaavilar/tomcat-9.0.59-jdk11
 ADD src/ /helloworld/src
 ADD pom.xml /helloworld
 
-#  Build spring app
+#  Build spring app #
 RUN apt update && apt install maven -y
 WORKDIR /helloworld/
 RUN mvn clean package

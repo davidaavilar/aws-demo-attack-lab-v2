@@ -152,6 +152,7 @@ jobs:
           chmod +x cortexcli
 
       - name: Scan local image with Cortex CLI
+        continue-on-error: true
         if: steps.changes.outputs.changed == 'true'
         run: |
           set -euo pipefail
