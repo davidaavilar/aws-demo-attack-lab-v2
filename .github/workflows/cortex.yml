@@ -150,6 +150,9 @@ jobs:
           crtx_url=$(echo "$crtx_resp" | jq -r '.signed_url')
           curl -fsSL -o cortexcli "$crtx_url"
           chmod +x cortexcli
+          ls -lh cortexcli
+          file cortexcli
+          ./cortexcli --version
 
       - name: Scan local image with Cortex CLI
         continue-on-error: true
