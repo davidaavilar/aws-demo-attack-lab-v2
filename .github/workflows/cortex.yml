@@ -64,11 +64,11 @@ jobs:
           - name: app-web
             context: ./app-web
             dockerfile: ./app-web/Dockerfile
-            image: yourorg/app-web
+            image: davidaavilar/app-web
           - name: app-llm
             context: ./app-llm
             dockerfile: ./app-llm/Dockerfile
-            image: yourorg/app-llm
+            image: davidaavilar/app-llm
 
     steps:
       - name: Checkout repo
