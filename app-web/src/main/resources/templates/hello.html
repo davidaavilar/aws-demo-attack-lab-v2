@@ -5,25 +5,107 @@
     <title>Cortex Cloud Demo</title>
     <style>
         body {
-          height: 100%;
-          min-height: 100vh;
-          margin: 0;
-          padding: 0;
-          background-color:rgb(0, 0, 0);
+            min-height: 100vh;
+            margin: 0;
+            padding: 30px;
+            background-color: rgb(0, 0, 0);
+            color: white;
+            font-family: Arial, sans-serif;
         }
-        .heading{
+        .heading {
             text-align: center;
-              color: rgb(255, 255, 255);
+        }
+        .chat-box {
+            max-width: 800px;
+            margin: 30px auto 0;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        #messages {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #333;
+            padding: 10px;
+            margin-bottom: 15px;
+            background: #000;
+        }
+        .msg {
+            margin: 10px 0;
+        }
+        .user {
+            color: #4fc3f7;
+        }
+        .bot {
+            color: #81c784;
+        }
+        .input-row {
+            display: flex;
+            gap: 10px;
+        }
+        input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background: #222;
+            color: white;
+        }
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            background: #1976d2;
+            color: white;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <div class="heading">
-        <h1> Hello World !</h1>
-        <h2>
-              Welcome to Cortex Cloud App !!
-          </h2>
-        <h2> This is an vulnerable application protected by Cortex Cloud !! </h2>
+<div class="heading">
+    <h1>Hello World!</h1>
+    <h2>Welcome to Cortex Cloud App!!</h2>
+    <h2>This is a vulnerable application protected by Cortex Cloud!!</h2>
+</div>
+
+<div class="chat-box">
+    <h3>Chat with LLM</h3>
+    <div id="messages"></div>
+
+    <div class="input-row">
+        <input type="text" id="message" placeholder="Write a message..." />
+        <button onclick="sendMessage()">Send</button>
     </div>
+</div>
+
+<script>
+    async function sendMessage() {
+        const input = document.getElementById("message");
+        const messages = document.getElementById("messages");
+        const text = input.value.trim();
+
+        if (!text) return;
+
+        messages.innerHTML += `<div class="msg user"><b>You:</b> ${text}</div>`;
+        input.value = "";
+
+        try {
+            const response = await fetch("/api/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ message: text })
+            });
+
+            const data = await response.json();
+            messages.innerHTML += `<div class="msg bot"><b>LLM:</b> ${data.response}</div>`;
+            messages.scrollTop = messages.scrollHeight;
+        } catch (e) {
+            messages.innerHTML += `<div class="msg bot"><b>Error:</b> Could not contact backend</div>`;
+        }
+    }
+</script>
 </body>
 </html>

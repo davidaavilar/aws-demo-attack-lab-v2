@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: springapp
-        image: davidaavilar/springapp:cortex
+        image: davidaavilar/app-web
         ports:
         - containerPort: 8080
 
@@ -40,4 +40,3 @@ spec:
     targetPort: 8080
   selector:
     name: springapp
-
