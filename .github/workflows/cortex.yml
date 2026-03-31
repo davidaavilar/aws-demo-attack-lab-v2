@@ -7,12 +7,14 @@ on:
 permissions:
   contents: read
 
+env:
+    CORTEX_API_KEY: ${{secrets.CORTEX_API_KEY}}
+    CORTEX_API_KEY_ID: ${{secrets.CORTEX_API_KEY_ID}}
+    CORTEX_API_URL: https://api-davila.xdr.us.paloaltonetworks.com
+    detectChanges: false
+
 jobs:
   # cortex_code_scan:
-  #   env:
-  #     CORTEX_API_KEY: ${{secrets.CORTEX_API_KEY}}
-  #     CORTEX_API_KEY_ID: ${{secrets.CORTEX_API_KEY_ID}}
-  #     CORTEX_API_URL: https://api-davila.xdr.us.paloaltonetworks.com
   #   runs-on: ubuntu-latest
 
   #   steps:
