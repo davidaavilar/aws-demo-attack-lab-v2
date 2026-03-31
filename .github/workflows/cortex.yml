@@ -8,31 +8,6 @@ permissions:
   contents: read
 
 jobs:
-  # destroy_deployment:
-  #   permissions:
-  #     contents: read
-  #     security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
-  #     actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
-  #   runs-on: ubuntu-24.04
-  #   name: Terraform Deployment
-  #   env:
-  #     working-directory: ./infra
-  #     AWS_REGION: ${{ vars.AWS_REGION }}
-  #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #     S3_BACKEND: ${{ vars.S3_BACKEND }}
-  #     DEPLOYMENT_NAME: ${{ vars.DEPLOYMENT_NAME }}
-  #   outputs:
-  #     KUBE_CONFIG: ${{ steps.step4.outputs.KUBE_CONFIG }}
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: hashicorp/setup-terraform@v3
-  #     - name: Terraform Deployment
-  #       id: init
-  #       working-directory: ${{ env.working-directory }}
-  #       run: |
-  #         terraform init -backend-config="bucket=${{ env.S3_BACKEND }}" -backend-config="region=${{ env.AWS_REGION }}" -backend-config="key=terraform.tfstate"
-  #         terraform destroy --auto-approve
   # cortex_code_scan:
   #   env:
   #     CORTEX_API_KEY: ${{secrets.CORTEX_API_KEY}}
@@ -82,12 +57,24 @@ jobs:
       security-events: write
       actions: read
     runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: app-web
+            context: ./app-web
+            dockerfile: ./app-web/Dockerfile
+            image: yourorg/app-web
+          - name: app-llm
+            context: ./app-llm
+            dockerfile: ./app-llm/Dockerfile
+            image: yourorg/app-llm
+
     name: Docker Build, Scan and Push
 
     env:
-      IMAGE_NAME: ${{ vars.IMAGE_NAME }}:cortex
-      CORTEX_API_KEY: ${{secrets.CORTEX_API_KEY}}
-      CORTEX_API_KEY_ID: ${{secrets.CORTEX_API_KEY_ID}}
+      CORTEX_API_KEY: ${{ secrets.CORTEX_API_KEY }}
+      CORTEX_API_KEY_ID: ${{ secrets.CORTEX_API_KEY_ID }}
       CORTEX_API_URL: https://api-davila.xdr.us.paloaltonetworks.com
 
     steps:
@@ -100,8 +87,15 @@ jobs:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ matrix.image }}
+          tags: |
+            type=sha
+            type=ref,event=branch
+            type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -109,46 +103,53 @@ jobs:
       - name: Install Hyperscan
         run: |
           sudo apt-get update
-          sudo apt-get install -y libhyperscan5
+          sudo apt-get install -y libhyperscan5 jq
 
-      - name: Build image as tar
+      - name: Build image locally for scan
         uses: docker/build-push-action@v6
         with:
-          context: ./app
-          file: ./app/Dockerfile
-          tags: ${{ env.IMAGE_NAME }}
-          outputs: type=docker,dest=/tmp/image.tar
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          load: true
           push: false
-
-      - name: Verify tar exists
-        run: ls -lh /tmp/image.tar
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
 
       - name: Download cortexcli
         run: |
-          set -x
-          crtx_resp=$(curl "${CORTEX_API_URL}/public_api/v1/unified-cli/releases/download-link?os=linux&architecture=amd64" \
+          set -euo pipefail
+          crtx_resp=$(curl -fsSL "${CORTEX_API_URL}/public_api/v1/unified-cli/releases/download-link?os=linux&architecture=amd64" \
             -H "x-xdr-auth-id: ${CORTEX_API_KEY_ID}" \
             -H "Authorization: ${CORTEX_API_KEY}")
-          crtx_url=$(echo $crtx_resp | jq -r ".signed_url")
-          curl -o cortexcli $crtx_url
+          crtx_url=$(echo "$crtx_resp" | jq -r '.signed_url')
+          curl -fsSL -o cortexcli "$crtx_url"
           chmod +x cortexcli
           ./cortexcli --version
 
-      - name: Scan image tar with Cortex CLI
+      - name: Scan local image with Cortex CLI
         run: |
+          set -euo pipefail
+          IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n 1)
+          echo "Scanning ${IMAGE_TAG}"
           ./cortexcli \
             --api-base-url "${CORTEX_API_URL}" \
             --api-key "${CORTEX_API_KEY}" \
             --api-key-id "${CORTEX_API_KEY_ID}" \
-            image scan --archive=true /tmp/image.tar
+            image scan "${IMAGE_TAG}"
 
-      - name: Build and push image
+      - name: Push image
+        if: github.event_name != 'pull_request'
         uses: docker/build-push-action@v6
         with:
-          context: ./app
-          file: ./app/Dockerfile
-          tags: ${{ env.IMAGE_NAME }}
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           push: true
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
 
   # infra_deployment:
   #   # needs: cortex_code_scan
@@ -180,38 +181,3 @@ jobs:
   #       working-directory: ${{ env.working-directory }}
   #       id: step4
   #       run: echo "KUBE_CONFIG=$(terraform output update_kube_config)" >> $GITHUB_OUTPUT
-  
-  # app_deployment:
-  #   needs: [infra_deployment, docker_build_and_push] 
-  #   permissions:
-  #     contents: read
-  #     security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
-  #     actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
-  #   runs-on: ubuntu-24.04
-  #   name: Application Deployment
-  #   env:
-  #     working-directory: ./k8s_files
-  #     KUBE_CONFIG: ${{needs.infra_deployment.outputs.KUBE_CONFIG}}
-  #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: cschleiden/replace-tokens@v1
-  #       with:
-  #         tokenPrefix: '__'
-  #         tokenSuffix: '__'
-  #         files: '["**/app.yaml"]'
-  #       env:
-  #         imageName: ${{ vars.IMAGE_NAME }}
-  #         imageTag: "latest"
-  #     # - name: Defender Deployment
-  #     #   working-directory: ${{ env.working-directory }}
-  #     #   run: |
-  #     #     bash -c ${{ env.KUBE_CONFIG }}
-  #     #     kubectl create ns twistlock
-  #     #     kubectl apply -f daemonset.yaml
-  #     - name: Application Deployment
-  #       working-directory: ${{ env.working-directory }}
-  #       run: |
-  #         bash -c ${{ env.KUBE_CONFIG }}
-  #         kubectl apply -f app.yaml
