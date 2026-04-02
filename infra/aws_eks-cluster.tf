@@ -8,17 +8,17 @@ module "eks" {
   subnet_ids             = module.vpc.private_subnets
   endpoint_public_access = true
 
-  create_security_group = false
-  create_node_security_group    = false
+  addons = {
+  coredns = {}
+  kube-proxy = {}
+  vpc-cni = {}
+  }
 
   eks_managed_node_groups = {
     one = {
-      name           = "${var.deployment_name}-ng"
+      name           = "${var.deployment_name}-ng-last"
       instance_types = ["t3a.large"]
       ami_type       = "AL2023_x86_64_STANDARD"
-
-      use_custom_launch_template = false
-      create_launch_template     = false
 
       min_size     = 2
       max_size     = 3
