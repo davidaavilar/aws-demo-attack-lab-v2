@@ -13,6 +13,7 @@ module "eks" {
   addons = {
     vpc-cni = {
       most_recent = true
+      before_compute = true
     }
     kube-proxy = {
       most_recent = true
@@ -21,7 +22,7 @@ module "eks" {
       most_recent = true
     }
   }
-  
+
   eks_managed_node_groups = {
     default = {
       instance_types = ["t3.medium"]
