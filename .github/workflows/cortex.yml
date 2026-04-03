@@ -71,6 +71,8 @@ jobs:
           - name: app-llm
             context: ./app-llm
             dockerfile: ./app-llm/Dockerfile
+    outputs:
+      changed: ${{ steps.changes.outputs.changed }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -136,6 +138,7 @@ jobs:
   
   docker_scan_cortex_cloud:
     needs: docker_build
+    if: needs.docker_build.outputs.changed
     permissions:
       contents: read
       security-events: write
@@ -185,6 +188,7 @@ jobs:
             image scan /tmp/${{ matrix.name }}.tar
   docker_push:
     needs: docker_scan_cortex_cloud
+    if: needs.docker_build.outputs.changed == 'true' && github.event_name != 'pull_request'
     permissions:
       contents: read
       security-events: write
