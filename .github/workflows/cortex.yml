@@ -205,8 +205,8 @@ jobs:
       - name: Download image artifact
         uses: actions/download-artifact@v4
         with:
-        name: ${{ matrix.name }}-image
-        path: /tmp
+          name: ${{ matrix.name }}-image
+          path: /tmp
       - name: Load image
         run: docker load -i /tmp/${{ matrix.name }}.tar
       - name: Log in to Docker Hub
@@ -224,48 +224,7 @@ jobs:
           push: true
           cache-from: type=gha,scope=${{ matrix.name }}
           cache-to: type=gha,mode=max,scope=${{ matrix.name }}
-  # docker_build_scan_and_push:
-  #   permissions:
-  #     contents: read
-  #     security-events: write
-  #     actions: read
-  #   runs-on: ubuntu-22.04
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       include:
-  #         - name: app-web
-  #           context: ./app-web
-  #           dockerfile: ./app-web/Dockerfile
-  #           image: davidaavilar/app-web
-  #         - name: app-llm
-  #           context: ./app-llm
-  #           dockerfile: ./app-llm/Dockerfile
-  #           image: davidaavilar/app-llm
 
-    
-
-
-
-      
-
-      
-
-  #     - name: Install Hyperscan
-  #       if: steps.changes.outputs.changed == 'true'
-  #       run: |
-  #         sudo apt-get update
-  #         sudo apt-get install -y libhyperscan5 jq
-
-      
-
-
-
-
-
-  #     - name: Skip notice
-  #       if: steps.changes.outputs.changed != 'true'
-  #       run: echo "No changes in ${{ matrix.name }}. Skipping build/scan/push."
 
   # infra_deployment:
   #   needs: cortex_code_scan
