@@ -2,25 +2,25 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: springapp
+  name: app-web
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: springapp
-  namespace: springapp
+  name: app-web
+  namespace: app-web
 spec:
   selector:
     matchLabels:
-      name: springapp
+      name: app-web
   replicas: 2
   template:
     metadata:
       labels:
-        name: springapp
+        name: app-web
     spec:
       containers:
-      - name: springapp
+      - name: app-web
         image: davidaavilar/app-web
         ports:
         - containerPort: 8080
@@ -29,14 +29,14 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: springapp
-  name: springapp
+  namespace: app-web
+  name: app-web
   labels:
-    name: springapp
+    name: app-web
 spec:
   type: LoadBalancer
   ports:
   - port: 80
     targetPort: 8080
   selector:
-    name: springapp
+    name: app-web

@@ -2,27 +2,27 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: ollama-llm
+  name: app-llm
 ---
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ollama-llm
-  namespace: ollama-llm
+  name: app-llm
+  namespace: app-llm
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ollama-llm
+      app: app-llm
   template:
     metadata:
       labels:
-        app: ollama-llm
+        app: app-llm
     spec:
       containers:
         - name: ollama
-          image: davidaavilar/ollama-llm:1.0
+          image: davidaavilar/app-llm
           ports:
             - containerPort: 11434
           resources:
@@ -36,12 +36,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: ollama-llm
-  namespace: ollama-llm
+  name: app-llm
+  namespace: app-llm
 spec:
   type: ClusterIP
   selector:
-    app: ollama-llm
+    app: app-llm
   ports:
     - port: 11434
       targetPort: 11434
