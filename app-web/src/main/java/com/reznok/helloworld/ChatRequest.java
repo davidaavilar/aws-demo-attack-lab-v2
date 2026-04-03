@@ -1,4 +1,5 @@
 package com.reznok.helloworld;
+
 public class ChatRequest {
     private String message;
 
