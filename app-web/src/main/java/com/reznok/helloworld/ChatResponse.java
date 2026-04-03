@@ -1,3 +1,5 @@
+package com.reznok.helloworld;
+
 public class ChatResponse {
     private String response;
 
