@@ -115,6 +115,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
       
       - name: Build image
+        if: steps.changes.outputs.changed == 'true'
         uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.context }}
@@ -123,6 +124,7 @@ jobs:
           load: true
           push: false
       - name: Save image
+        if: steps.changes.outputs.changed == 'true'
         run: docker save local/${{ matrix.name }}:scan -o /tmp/${{ matrix.name }}.tar
       - name: Upload image artifact
         if: steps.changes.outputs.changed == 'true'
@@ -166,10 +168,12 @@ jobs:
             echo "exists=false" >> "$GITHUB_OUTPUT"
           fi
       - name: Install Hyperscan
+        if: steps.check_tar.outputs.exists == 'true'
         run: |
           sudo apt-get update
           sudo apt-get install -y libhyperscan5 jq
       - name: Download cortexcli
+        if: steps.check_tar.outputs.exists == 'true'
         run: |
           set -euo pipefail
           crtx_resp=$(curl -fsSL "${CORTEX_API_URL}/public_api/v1/unified-cli/releases/download-link?os=linux&architecture=amd64" \
@@ -188,7 +192,7 @@ jobs:
             --api-base-url "${CORTEX_API_URL}" \
             --api-key "${CORTEX_API_KEY}" \
             --api-key-id "${CORTEX_API_KEY_ID}" \
-            --archive=true \
+            --archive true \
             image scan /tmp/${{ matrix.name }}.tar
       - name: Skip scan
         if: steps.check_tar.outputs.exists != 'true'
