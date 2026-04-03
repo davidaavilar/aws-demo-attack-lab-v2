@@ -100,7 +100,8 @@
             });
 
             const data = await response.json();
-            messages.innerHTML += `<div class="msg bot"><b>LLM:</b> ${data.response}</div>`;
+            console.log("API RESPONSE:", data);
+            messages.innerHTML += `<div class="msg bot"><b>LLM:</b> ${data.response || JSON.stringify(data)}</div>`;
             messages.scrollTop = messages.scrollHeight;
         } catch (e) {
             messages.innerHTML += `<div class="msg bot"><b>Error:</b> Could not contact backend</div>`;
