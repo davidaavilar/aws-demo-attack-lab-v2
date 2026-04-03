@@ -27,7 +27,7 @@ public class LlmService {
         if (history.isEmpty()) {
             history.add(Map.of(
                     "role", "system",
-                    "content", "Eres un asistente de Productos de Cortex de Palo Alto Networks. Responde corto y claro."
+                    "content", "Eres un asistente de Productos de Cortex de Palo Alto Networks. Responde corto y claro. Maximo 60 caracteres"
             ));
         }
 
