@@ -156,6 +156,15 @@ jobs:
         with:
           name: ${{ matrix.name }}-image
           path: /tmp
+        continue-on-error: true
+      - name: Check tar
+        id: check_tar
+        run: |
+          if [ -f "/tmp/${{ matrix.name }}.tar" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Install Hyperscan
         run: |
           sudo apt-get update
@@ -171,7 +180,7 @@ jobs:
           chmod +x cortexcli
       - name: Scan local image with Cortex CLI
         continue-on-error: true
-        if: steps.changes.outputs.changed == 'true'
+        if: steps.check_tar.outputs.exists == 'true'
         run: |
           set -euo pipefail
           IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n 1)
@@ -181,6 +190,9 @@ jobs:
             --api-key-id "${CORTEX_API_KEY_ID}" \
             --archive=true \
             image scan /tmp/${{ matrix.name }}.tar
+      - name: Skip scan
+        if: steps.check_tar.outputs.exists != 'true'
+        run: echo "No tar found for ${{ matrix.name }}, skipping."
   docker_push:
     needs: docker_scan_cortex_cloud
     if: needs.docker_build.outputs.changed == 'true' && github.event_name != 'pull_request'
