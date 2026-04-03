@@ -192,8 +192,7 @@ jobs:
             --api-base-url "${CORTEX_API_URL}" \
             --api-key "${CORTEX_API_KEY}" \
             --api-key-id "${CORTEX_API_KEY_ID}" \
-            --archive true \
-            image scan /tmp/${{ matrix.name }}.tar
+            image scan --archive=true /tmp/${{ matrix.name }}.tar
       - name: Skip scan
         if: steps.check_tar.outputs.exists != 'true'
         run: echo "No tar found for ${{ matrix.name }}, skipping."
