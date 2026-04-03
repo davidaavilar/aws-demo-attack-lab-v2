@@ -63,6 +63,7 @@
     </style>
 </head>
 <body>
+
 <div class="heading">
     <h1>Hello World!</h1>
     <h2>Welcome to Cortex Cloud App!!</h2>
@@ -70,16 +71,23 @@
 </div>
 
 <div class="chat-box">
-    <h3>Chat with LLM</h3>
+    <h3>Chat with Cortex Assistant</h3>
     <div id="messages"></div>
 
     <div class="input-row">
-        <input type="text" id="message" placeholder="Write a message..." />
+        <input type="text" id="message" placeholder="Write a message..." onkeydown="handleKey(event)" />
         <button onclick="sendMessage()">Send</button>
     </div>
 </div>
 
 <script>
+    function handleKey(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            sendMessage();
+        }
+    }
+
     async function sendMessage() {
         const input = document.getElementById("message");
         const messages = document.getElementById("messages");
@@ -100,13 +108,13 @@
             });
 
             const data = await response.json();
-            console.log("API RESPONSE:", data);
-            messages.innerHTML += `<div class="msg bot"><b>Cortex Assistant:</b> ${data.response || JSON.stringify(data)}</div>`;
+            messages.innerHTML += `<div class="msg bot"><b>Cortex Assistant:</b> ${data.response}</div>`;
             messages.scrollTop = messages.scrollHeight;
         } catch (e) {
             messages.innerHTML += `<div class="msg bot"><b>Error:</b> Could not contact backend</div>`;
         }
     }
 </script>
+
 </body>
 </html>
