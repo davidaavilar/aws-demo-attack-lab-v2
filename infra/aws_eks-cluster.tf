@@ -10,6 +10,18 @@ module "eks" {
 
   endpoint_public_access = true
 
+  addons = {
+    vpc-cni = {
+      most_recent = true
+    }
+    kube-proxy = {
+      most_recent = true
+    }
+    coredns = {
+      most_recent = true
+    }
+  }
+  
   eks_managed_node_groups = {
     default = {
       instance_types = ["t3.medium"]
