@@ -55,6 +55,7 @@ jobs:
 
   
   docker_build:
+    needs: cortex_code_scan
     permissions:
       contents: read
       security-events: write
