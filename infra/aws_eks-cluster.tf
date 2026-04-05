@@ -16,7 +16,7 @@ module "eks" {
 
   endpoint_public_access = true
   enable_cluster_creator_admin_permissions = true
-  
+
   addons = {
     vpc-cni = {
       most_recent = true

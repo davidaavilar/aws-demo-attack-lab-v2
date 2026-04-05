@@ -27,11 +27,16 @@ public class LlmService {
         if (history.isEmpty()) {
             history.add(Map.of(
                     "role", "system",
-                    "content", "Eres un asistente de Productos de Cortex de Palo Alto Networks. Responde corto y claro. Maximo 60 caracteres"
+                    "content", "You are Cortex Assistant for Palo Alto Networks. Answer clearly, briefly, and accurately. If you are not sure, say so. Do not invent product capabilities."
             ));
         }
 
-        history.add(Map.of("role", "user", "content", userMessage));
+        history.add(Map.of(
+                "role", "user",
+                "content", userMessage
+        ));
+
+        trimHistory(history);
 
         Map<String, Object> payload = new HashMap<>();
         payload.put("model", llmModel);
@@ -53,12 +58,34 @@ public class LlmService {
         Map message = (Map) response.getBody().get("message");
         String reply = message.get("content").toString();
 
-        history.add(Map.of("role", "assistant", "content", reply));
+        history.add(Map.of(
+                "role", "assistant",
+                "content", reply
+        ));
+
+        trimHistory(history);
 
         return reply;
     }
 
     public void clearMemory(String sessionId) {
         memory.remove(sessionId);
+    }
+
+    private void trimHistory(List<Map<String, String>> history) {
+        int maxMessages = 11; // 1 system + últimas 10 interacciones aprox
+        if (history.size() <= maxMessages) {
+            return;
+        }
+
+        Map<String, String> systemMessage = history.get(0);
+        List<Map<String, String>> trimmed = new ArrayList<>();
+        trimmed.add(systemMessage);
+
+        int start = Math.max(1, history.size() - (maxMessages - 1));
+        trimmed.addAll(history.subList(start, history.size()));
+
+        history.clear();
+        history.addAll(trimmed);
     }
 }

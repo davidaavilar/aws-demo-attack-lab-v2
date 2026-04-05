@@ -3,6 +3,9 @@ package com.reznok.helloworld;
 public class ChatResponse {
     private String response;
 
+    public ChatResponse() {
+    }
+
     public ChatResponse(String response) {
         this.response = response;
     }

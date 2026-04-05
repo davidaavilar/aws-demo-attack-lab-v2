@@ -1,5 +1,7 @@
 package com.reznok.helloworld;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,15 +26,27 @@ public class ChatController {
             return ResponseEntity.badRequest().body(new ChatResponse("Empty message"));
         }
 
+        boolean newSession = false;
+
         if (sessionId == null || sessionId.isBlank()) {
             sessionId = UUID.randomUUID().toString();
+            newSession = true;
         }
 
         String reply = llmService.ask(sessionId, request.getMessage());
 
-        return ResponseEntity.ok()
-                .header("Set-Cookie", "chat-session=" + sessionId + "; Path=/; HttpOnly")
-                .body(new ChatResponse(reply));
+        ResponseEntity.BodyBuilder builder = ResponseEntity.ok();
+
+        if (newSession) {
+            ResponseCookie cookie = ResponseCookie.from("chat-session", sessionId)
+                    .path("/")
+                    .httpOnly(true)
+                    .build();
+
+            builder.header(HttpHeaders.SET_COOKIE, cookie.toString());
+        }
+
+        return builder.body(new ChatResponse(reply));
     }
 
     @PostMapping("/clear")
@@ -42,6 +56,6 @@ public class ChatController {
         if (sessionId != null && !sessionId.isBlank()) {
             llmService.clearMemory(sessionId);
         }
+
         return ResponseEntity.ok(new ChatResponse("Memory cleared"));
     }
-}
