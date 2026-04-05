@@ -1,3 +1,9 @@
+data "aws_caller_identity" "current" {}
+
+output "current_principal_arn" {
+  value = data.aws_caller_identity.current.arn
+}
+
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 21.0"
@@ -9,7 +15,8 @@ module "eks" {
   subnet_ids = module.vpc.private_subnets
 
   endpoint_public_access = true
-
+  enable_cluster_creator_admin_permissions = true
+  
   addons = {
     vpc-cni = {
       most_recent = true
