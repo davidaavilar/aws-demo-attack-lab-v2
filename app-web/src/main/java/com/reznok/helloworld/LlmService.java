@@ -22,50 +22,63 @@ public class LlmService {
     private final Map<String, List<Map<String, String>>> memory = new ConcurrentHashMap<>();
 
     public String ask(String sessionId, String userMessage) {
-        List<Map<String, String>> history = memory.computeIfAbsent(sessionId, k -> new ArrayList<>());
+    List<Map<String, String>> history = memory.computeIfAbsent(sessionId, k -> new ArrayList<>());
 
-        if (history.isEmpty()) {
-            history.add(Map.of(
-                    "role", "system",
-                    "content", "You are Cortex Assistant for Palo Alto Networks. Answer clearly, briefly, and accurately. If you are not sure, say so. Do not invent product capabilities."
-            ));
-        }
-
+    if (history.isEmpty()) {
         history.add(Map.of(
-                "role", "user",
-                "content", userMessage
+                "role", "system",
+                "content", """
+            You are Cortex Assistant for Palo Alto Networks.
+
+            Rules:
+            - Use the conversation history as the source of truth.
+            - Never invent facts.
+            - If the user already provided a fact, always reuse it.
+            - If you do not know something, say you do not know.
+            - Do not make up names, products, features, or personal details.
+            - Answer briefly and clearly.
+            """
         ));
+    }
 
-        trimHistory(history);
+    history.add(Map.of(
+            "role", "user",
+            "content", userMessage
+    ));
 
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("model", llmModel);
-        payload.put("stream", false);
-        payload.put("messages", history);
+    trimHistory(history);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+    Map<String, Object> payload = new HashMap<>();
+    payload.put("model", llmModel);
+    payload.put("stream", false);
+    payload.put("messages", history);
+    payload.put("options", Map.of(
+            "temperature", 0.2
+    ));
 
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(payload, headers);
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
 
-        ResponseEntity<Map> response = restTemplate.exchange(
-                llmUrl,
-                HttpMethod.POST,
-                entity,
-                Map.class
-        );
+    HttpEntity<Map<String, Object>> entity = new HttpEntity<>(payload, headers);
 
-        Map message = (Map) response.getBody().get("message");
-        String reply = message.get("content").toString();
+    ResponseEntity<Map> response = restTemplate.exchange(
+            llmUrl,
+            HttpMethod.POST,
+            entity,
+            Map.class
+    );
 
-        history.add(Map.of(
-                "role", "assistant",
-                "content", reply
-        ));
+    Map message = (Map) response.getBody().get("message");
+    String reply = message.get("content").toString();
 
-        trimHistory(history);
+    history.add(Map.of(
+            "role", "assistant",
+            "content", reply
+    ));
 
-        return reply;
+    trimHistory(history);
+
+    return reply;
     }
 
     public void clearMemory(String sessionId) {
