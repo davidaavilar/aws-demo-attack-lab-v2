@@ -59,3 +59,4 @@ public class ChatController {
 
         return ResponseEntity.ok(new ChatResponse("Memory cleared"));
     }
+}
