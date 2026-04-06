@@ -245,10 +245,10 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Tag image
         if: steps.check_tar.outputs.exists == 'true'
-        run: docker tag local/${{ matrix.name }}:scan ${{ matrix.image }}:${{ github.sha }}
+        run: docker tag local/${{ matrix.name }}:scan ${{ matrix.image }}
       - name: Push image
         if: steps.check_tar.outputs.exists == 'true'
-        run: docker push ${{ matrix.image }}:${{ github.sha }}
+        run: docker push ${{ matrix.image }}
 
 
   infra_deployment:
