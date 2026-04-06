@@ -31,7 +31,7 @@ module "eks" {
   }
 
   eks_managed_node_groups = {
-    default_v2 = {
+    default_v3 = {
       instance_types = ["t3a.xlarge"]
       min_size       = 1
       max_size       = 2
@@ -41,6 +41,7 @@ module "eks" {
 
       capacity_type = "ON_DEMAND"
 
+      use_custom_launch_template = false
       disk_size = 100
     }
   }
