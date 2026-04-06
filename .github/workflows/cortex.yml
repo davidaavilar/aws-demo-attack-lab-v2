@@ -218,6 +218,7 @@ jobs:
           - name: app-llm
             context: ./app-llm
             dockerfile: ./app-llm/Dockerfile
+            image: davidaavilar/app-llm
     steps:
       - name: Download image artifact
         uses: actions/download-artifact@v4
