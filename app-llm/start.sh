@@ -4,8 +4,11 @@ set -e
 ollama serve &
 PID=$!
 
-sleep 5
+# esperar a que ollama responda
+until curl -s http://localhost:11434 > /dev/null; do
+  sleep 1
+done
 
-ollama pull llama3.2:1b
+ollama pull qwen2.5:7b
 
 wait $PID
