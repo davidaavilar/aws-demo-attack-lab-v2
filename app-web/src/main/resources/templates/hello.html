@@ -74,9 +74,9 @@
     <div id="messages"></div>
 
     <div class="input-row">
-        <input type="text" id="message" placeholder="Write a message..." onkeydown="handleKey(event)" />
-        <button onclick="sendMessage()">Send</button>
-    </div>
+    <input type="text" id="message" placeholder="Write a message..." onkeydown="handleKey(event)" />
+    <button onclick="sendMessage()">Send</button>
+    <button onclick="clearChat()" style="background:#444;">Clear</button>
 </div>
 
 <p style="text-align:center; color:#bbb; font-size:13px; margin-top:10px;">
@@ -115,6 +115,20 @@
             messages.scrollTop = messages.scrollHeight;
         } catch (e) {
             messages.innerHTML += `<div class="msg bot"><b>Error:</b> Could not contact backend</div>`;
+        }
+    }
+
+    async function clearChat() {
+        const messages = document.getElementById("messages");
+
+        try {
+            await fetch("/helloworld/api/clear", {
+                method: "POST"
+            });
+
+            messages.innerHTML = "";
+        } catch (e) {
+            messages.innerHTML += `<div class="msg bot"><b>Error:</b> Could not clear memory</div>`;
         }
     }
 </script>
