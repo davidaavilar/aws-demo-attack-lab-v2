@@ -4,7 +4,7 @@ set -e
 ollama serve &
 PID=$!
 
-# esperar a que ollama responda
+# wait until ollama respond
 until curl -s http://localhost:11434 > /dev/null; do
   sleep 1
 done
