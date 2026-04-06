@@ -40,6 +40,8 @@ module "eks" {
       ami_type = "AL2023_x86_64_STANDARD"
 
       capacity_type = "ON_DEMAND"
+
+      disk_size = 100
     }
   }
 }
