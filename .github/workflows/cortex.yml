@@ -72,6 +72,7 @@ jobs:
           - name: app-llm
             context: ./app-llm
             dockerfile: ./app-llm/Dockerfile
+            image: davidaavilar/app-llm
     outputs:
       changed: ${{ steps.changes.outputs.changed }}
     steps:
