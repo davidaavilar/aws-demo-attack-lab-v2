@@ -11,6 +11,6 @@ sleep 5
 #   sleep 1
 # done
 
-ollama pull qwen2.5:7b
+ollama pull qwen2.5:1.5b
 
 wait $PID
