@@ -7,8 +7,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 public class LlmService {
@@ -22,25 +20,21 @@ public class LlmService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     private final Map<String, List<Map<String, String>>> memory = new ConcurrentHashMap<>();
-    private final Map<String, Map<String, String>> userFacts = new ConcurrentHashMap<>();
 
     public String ask(String sessionId, String userMessage) {
         List<Map<String, String>> history = memory.computeIfAbsent(sessionId, k -> new ArrayList<>());
-        Map<String, String> facts = userFacts.computeIfAbsent(sessionId, k -> new HashMap<>());
-
-        extractFacts(facts, userMessage);
-
-        String systemPrompt = buildSystemPrompt(facts);
 
         if (history.isEmpty()) {
             history.add(Map.of(
                     "role", "system",
-                    "content", systemPrompt
-            ));
-        } else {
-            history.set(0, Map.of(
-                    "role", "system",
-                    "content", systemPrompt
+                    "content", "You are Cortex Assistant for Palo Alto Networks. " +
+                            "You must use the conversation history as the single source of truth. " +
+                            "If the user states a fact about themselves, you must remember it and reuse it consistently. " +
+                            "Never contradict prior user-provided facts. " +
+                            "Never say you do not know a fact if the user already told you. " +
+                            "When the user asks about their name, identity, or previous message, answer only from the conversation history. " +
+                            "Do not invent information. " +
+                            "Be brief and precise."
             ));
         }
 
@@ -56,7 +50,7 @@ public class LlmService {
         payload.put("stream", false);
         payload.put("messages", history);
         payload.put("options", Map.of(
-                "temperature", 0.1
+                "temperature", 0.0
         ));
 
         HttpHeaders headers = new HttpHeaders();
@@ -71,8 +65,19 @@ public class LlmService {
                 Map.class
         );
 
-        Map message = (Map) response.getBody().get("message");
-        String reply = message.get("content").toString();
+        Map body = response.getBody();
+        if (body == null || body.get("message") == null) {
+            return "I could not generate a response.";
+        }
+
+        Map message = (Map) body.get("message");
+        Object content = message.get("content");
+
+        if (content == null) {
+            return "I could not generate a response.";
+        }
+
+        String reply = content.toString();
 
         history.add(Map.of(
                 "role", "assistant",
@@ -86,35 +91,11 @@ public class LlmService {
 
     public void clearMemory(String sessionId) {
         memory.remove(sessionId);
-        userFacts.remove(sessionId);
-    }
-
-    private String buildSystemPrompt(Map<String, String> facts) {
-        StringBuilder prompt = new StringBuilder();
-        prompt.append("You are Cortex Assistant for Palo Alto Networks. ");
-        prompt.append("Answer briefly, clearly, and accurately. ");
-        prompt.append("Use the conversation history and known user facts as the source of truth. ");
-        prompt.append("Never invent names, facts, product capabilities, or personal details. ");
-        prompt.append("If you do not know something, say you do not know. ");
-
-        if (facts.containsKey("name")) {
-            prompt.append("The user's name is ").append(facts.get("name")).append(". ");
-        }
-
-        return prompt.toString();
-    }
-
-    private void extractFacts(Map<String, String> facts, String userMessage) {
-        Pattern pattern = Pattern.compile("(?i)\\b(?:my name is|i am|i'm|me llamo|soy)\\s+([A-Za-zÁÉÍÓÚáéíóúÑñ]+)");
-        Matcher matcher = pattern.matcher(userMessage.trim());
-
-        if (matcher.find()) {
-            facts.put("name", matcher.group(1));
-        }
     }
 
     private void trimHistory(List<Map<String, String>> history) {
-        int maxMessages = 11;
+        int maxMessages = 21; // 1 system + últimas 20 interacciones aprox
+
         if (history.size() <= maxMessages) {
             return;
         }
