@@ -43,9 +43,11 @@
         .input-row {
             display: flex;
             gap: 10px;
+            align-items: center;
         }
         input {
             flex: 1;
+            min-width: 0;
             padding: 10px;
             border-radius: 6px;
             border: 1px solid #444;
@@ -76,7 +78,7 @@
     <div class="input-row">
     <input type="text" id="message" placeholder="Write a message..." onkeydown="handleKey(event)" />
     <button onclick="sendMessage()">Send</button>
-    <button onclick="clearChat()" style="background:#444;">Clear</button>
+    <button onclick="clearChat()" style="background:#555;">Clear</button>
 </div>
 
 <p style="text-align:center; color:#bbb; font-size:13px; margin-top:10px;">
