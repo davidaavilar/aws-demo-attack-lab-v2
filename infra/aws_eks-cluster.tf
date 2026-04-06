@@ -31,7 +31,7 @@ module "eks" {
   }
 
   eks_managed_node_groups = {
-    default = {
+    default_v2 = {
       instance_types = ["t3a.xlarge"]
       min_size       = 1
       max_size       = 2

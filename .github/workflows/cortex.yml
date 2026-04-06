@@ -282,8 +282,7 @@ jobs:
           -backend-config="bucket=${{ env.S3_BACKEND }}" \
           -backend-config="region=${{ env.AWS_REGION }}" \
           -backend-config="key=terraform.tfstate"
-          terraform destroy -target='module.eks.aws_eks_node_group.this["default"]' -var="region=${{ env.AWS_REGION }}" -input=false
-          # terraform apply -auto-approve -var="region=${{ env.AWS_REGION }}" -input=false
+          terraform apply -auto-approve -var="region=${{ env.AWS_REGION }}" -input=false
       - name: Terraform Variables
         working-directory: ${{ env.working-directory }}
         id: step4
