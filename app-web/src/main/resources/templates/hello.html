@@ -78,7 +78,13 @@
     <div class="input-row">
     <input type="text" id="message" placeholder="Write a message..." onkeydown="handleKey(event)" />
     <button onclick="sendMessage()">Send</button>
-    <button onclick="clearChat()" style="background:#555;">Clear</button>
+</div>
+
+<div style="margin-top:10px; text-align:right;">
+    <button onclick="clearChat()" style="background:#444; color:white; padding:10px 16px; border:none; border-radius:6px; cursor:pointer;">
+        Clear Chat
+    </button>
+</div>
 </div>
 
 <p style="text-align:center; color:#bbb; font-size:13px; margin-top:10px;">
@@ -121,7 +127,7 @@
     }
 
     async function clearChat() {
-        const messages = document.getElementById("messages");
+    const messages = document.getElementById("messages");
 
         try {
             await fetch("/helloworld/api/clear", {
