@@ -32,7 +32,7 @@ module "eks" {
 
   eks_managed_node_groups = {
     default_v3 = {
-      instance_types = ["t3a.xlarge"]
+      instance_types = ["t3a.large"]
       min_size       = 1
       max_size       = 2
       desired_size   = 1
@@ -43,6 +43,22 @@ module "eks" {
 
       use_custom_launch_template = false
       disk_size = 100
+    }
+    llm = {
+      instance_types = ["g5.xlarge"]
+      min_size       = 1
+      max_size       = 2
+      desired_size   = 1
+
+      ami_type       = "AL2023_x86_64_STANDARD"
+      capacity_type  = "ON_DEMAND"
+
+      use_custom_launch_template = false
+      disk_size = 100
+
+      labels = {
+        workload = "llm"
+      }
     }
   }
 }
