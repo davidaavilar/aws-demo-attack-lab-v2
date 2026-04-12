@@ -50,7 +50,7 @@ module "eks" {
       max_size       = 2
       desired_size   = 1
 
-      ami_type       = "AL2023_x86_64_STANDARD"
+      ami_type       = "AL2023_x86_64_NVIDIA"
       capacity_type  = "ON_DEMAND"
 
       use_custom_launch_template = false
