@@ -72,7 +72,7 @@ jobs:
           - name: app-llm
             context: ./app-llm
             dockerfile: ./app-llm/Dockerfile
-            image: davidaavilar/gemma4:e2b
+            image: davidaavilar/qwen2.5:1.5b
     outputs:
       changed: ${{ steps.changes.outputs.changed }}
     steps:
@@ -154,7 +154,7 @@ jobs:
           - name: app-llm
             context: ./app-llm
             dockerfile: ./app-llm/Dockerfile
-            image: davidaavilar/gemma4:e2b
+            image: davidaavilar/qwen2.5:1.5b
     steps:
       - name: Download image artifact
         uses: actions/download-artifact@v4
@@ -218,7 +218,7 @@ jobs:
           - name: app-llm
             context: ./app-llm
             dockerfile: ./app-llm/Dockerfile
-            image: davidaavilar/gemma4:e2b
+            image: davidaavilar/qwen2.5:1.5b
     steps:
       - name: Download image artifact
         uses: actions/download-artifact@v4
