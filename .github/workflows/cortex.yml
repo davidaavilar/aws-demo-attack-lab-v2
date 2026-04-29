@@ -12,6 +12,7 @@ env:
     CORTEX_API_KEY_ID: ${{secrets.CORTEX_API_KEY_ID}}
     CORTEX_API_URL: https://api-davila.xdr.us.paloaltonetworks.com
     detectChanges: false
+    TF_ACTION: "apply"
 
 jobs:
   cortex_code_scan:
@@ -282,11 +283,7 @@ jobs:
           -backend-config="bucket=${{ env.S3_BACKEND }}" \
           -backend-config="region=${{ env.AWS_REGION }}" \
           -backend-config="key=terraform.tfstate"
-          terraform destroy -auto-approve -var="region=${{ env.AWS_REGION }}" -input=false
-      - name: Terraform Variables
-        working-directory: ${{ env.working-directory }}
-        id: step4
-        run: echo "KUBE_CONFIG=$(terraform output update_kube_config)" >> $GITHUB_OUTPUT
+          terraform ${{ env.TF_ACTION }} -auto-approve -var="region=${{ env.AWS_REGION }}" -input=false
   # app_deployment:
   #   needs: [infra_deployment, docker_build_and_push] 
   #   permissions:
