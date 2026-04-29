@@ -1,13 +1,15 @@
 
-output "cluster_name" {
-  description = "Amazon Web Service EKS Cluster Name"
-  value       = module.eks.cluster_name
-}
 
-output "region" {
-  description = "AWS Region"
-  value       = var.region
-}
+# output "region" {
+#   description = "AWS Region"
+#   value       = var.region
+# }
+
+
+# output "cluster_name" {
+#   description = "Amazon Web Service EKS Cluster Name"
+#   value       = module.eks.cluster_name
+# }
 
 # output "cluster_endpoint" {
 #   description = "Endpoint for Amazon Web Service EKS "
