@@ -39,7 +39,7 @@ jobs:
         crtx_url=$(echo $crtx_resp | jq -r ".signed_url")
         curl -o cortexcli $crtx_url
         chmod +x cortexcli
-        ./cortexcli --version
+        ./cortexcli --version | sed 's/\./ dot /g'
 
     - name: Run Cortex CLI Code Scan
       run: |
