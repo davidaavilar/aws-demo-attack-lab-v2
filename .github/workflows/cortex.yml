@@ -191,7 +191,7 @@ jobs:
         run: |
           set -euo pipefail
           IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n 1)
-          ./cortexcli \
+          ./cortexcli --log-level DEBUG \
             --api-base-url "${CORTEX_API_URL}" \
             --api-key "${CORTEX_API_KEY}" \
             --api-key-id "${CORTEX_API_KEY_ID}" \
