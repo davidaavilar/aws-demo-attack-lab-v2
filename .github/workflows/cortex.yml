@@ -77,6 +77,10 @@ jobs:
             context: ./app-debian
             dockerfile: ./app-debian/Dockerfile
             image: davidaavilar/debian:13
+          - name: app-alpaquita
+            context: ./app-alpaquita
+            dockerfile: ./app-alpaquita/Dockerfile
+            image: davidaavilar/alpaquita
     outputs:
       changed: ${{ steps.changes.outputs.changed }}
     steps:
@@ -163,6 +167,10 @@ jobs:
             context: ./app-debian
             dockerfile: ./app-debian/Dockerfile
             image: davidaavilar/debian:13
+          - name: app-alpaquita
+            context: ./app-alpaquita
+            dockerfile: ./app-alpaquita/Dockerfile
+            image: davidaavilar/alpaquita
     steps:
       - name: Download image artifact
         uses: actions/download-artifact@v4
@@ -232,6 +240,10 @@ jobs:
             context: ./app-debian
             dockerfile: ./app-debian/Dockerfile
             image: davidaavilar/debian:13
+          - name: app-alpaquita
+            context: ./app-alpaquita
+            dockerfile: ./app-alpaquita/Dockerfile
+            image: davidaavilar/alpaquita
     steps:
       - name: Download image artifact
         uses: actions/download-artifact@v4
