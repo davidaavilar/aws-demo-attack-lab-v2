@@ -1,15 +1,5 @@
-FROM debian:13-slim
+FROM davidaavilar/gim-openjdk25-multibase-hardened:candidate-2026w23-abf1c55f
 
-WORKDIR /app
+WORKDIR /opt/app
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-       ca-certificates \
-       curl \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY app.sh /app/app.sh
-
-RUN chmod +x /app/app.sh
-
-CMD ["/app/app.sh"]
+CMD ["java", "-version"]
