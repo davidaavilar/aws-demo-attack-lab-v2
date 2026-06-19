@@ -61,6 +61,7 @@ module "eks" {
       disk_size = 100
     }
   }
+
     # llm = {
     #   instance_types = ["g5.xlarge"]
     #   min_size       = 1
@@ -77,5 +78,4 @@ module "eks" {
     #     workload = "llm"
     #   }
     # }
-  }
 }
