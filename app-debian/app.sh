@@ -1,3 +1,5 @@
-#!/bin/sh
-echo "App corriendo sobre Debian 13"
-cat /etc/debian_version
+FROM davidaavilar/gim-openjdk25-multibase-hardened:candidate-2026w23-abf1c55f
+
+WORKDIR /opt/app
+
+CMD ["java", "-version"]
