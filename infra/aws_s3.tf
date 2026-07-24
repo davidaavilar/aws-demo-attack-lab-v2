@@ -6,6 +6,7 @@ resource "aws_s3_bucket" "data" {
   })
 }
 
+
 resource "aws_s3_object" "sensitive_customer_data_json" {
   bucket       = aws_s3_bucket.data.id
   key          = "test-data/customers/customer-001.json"
