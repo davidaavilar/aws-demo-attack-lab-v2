@@ -44,6 +44,7 @@ module "eks" {
       use_custom_launch_template = false
       disk_size = 100
     }
+  }
 
   # eks_managed_node_groups = {
   #   default_v3_arm = {
