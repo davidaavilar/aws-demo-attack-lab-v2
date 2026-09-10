@@ -48,12 +48,12 @@ jobs:
           --api-key "${CORTEX_API_KEY}" \
           --api-key-id "${CORTEX_API_KEY_ID}" \
           code scan \
-          --log-level "DEBUG" \
           --directory "${{github.workspace}}" \
           --repo-id "${{github.repository}}" \
           --branch "${{github.ref_name}}" \
           --source "GITHUB_ACTIONS" \
-          --create-repo-if-missing
+          --create-repo-if-missing \
+          --log-level "DEBUG"
 
   docker_build:
     needs: cortex_code_scan
