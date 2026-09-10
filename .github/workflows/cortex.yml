@@ -43,7 +43,7 @@ jobs:
 
     - name: Run Cortex CLI Code Scan
       run: |
-        ./cortexcli \
+        ./cortexcli --log-level "DEBUG" \
           --api-base-url "${CORTEX_API_URL}" \
           --api-key "${CORTEX_API_KEY}" \
           --api-key-id "${CORTEX_API_KEY_ID}" \
@@ -52,8 +52,7 @@ jobs:
           --repo-id "${{github.repository}}" \
           --branch "${{github.ref_name}}" \
           --source "GITHUB_ACTIONS" \
-          --create-repo-if-missing \
-          --log-level "DEBUG"
+          --create-repo-if-missing
 
   docker_build:
     needs: cortex_code_scan
