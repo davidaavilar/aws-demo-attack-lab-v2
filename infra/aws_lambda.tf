@@ -18,7 +18,6 @@ EOF
 }
 
 resource "aws_lambda_function" "analysis_lambda" {
-  # lambda have plain text secrets in environment variables
   filename      = "${path.root}/resources/lambda_function_payload.zip"
   function_name = "${var.deployment_name}-${random_string.unique_id.result}"
   role          = aws_iam_role.iam_for_lambda.arn
