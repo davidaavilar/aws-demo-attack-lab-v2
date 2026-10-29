@@ -8,30 +8,41 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: app-llm
+  name: llm
   namespace: app-llm
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: app-llm
+      app: llm
   template:
     metadata:
       labels:
-        app: app-llm
+        app: llm
     spec:
+      nodeSelector:
+        workload: llm
+
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "llm"
+          effect: "NoSchedule"
+
       containers:
         - name: ollama
-          image: davidaavilar/app-llm
+          image: davidaavilar/gemma4:e2b
           ports:
             - containerPort: 11434
           resources:
             requests:
               cpu: "1"
-              memory: "2Gi"
+              memory: "8Gi"
+              nvidia.com/gpu: "1"
             limits:
               cpu: "2"
-              memory: "4Gi"
+              memory: "16Gi"
+              nvidia.com/gpu: "1"
 ---
 apiVersion: v1
 kind: Service
@@ -41,7 +52,7 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-    app: app-llm
+    app: llm
   ports:
     - port: 11434
       targetPort: 11434

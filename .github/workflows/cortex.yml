@@ -12,7 +12,7 @@ env:
     CORTEX_API_KEY_ID: ${{secrets.CORTEX_API_KEY_ID}}
     CORTEX_API_URL: ${{ vars.CORTEX_API_URL }}
     detectChanges: false
-    TF_ACTION: "apply"
+    TF_ACTION: "destroy"
 
 jobs:
   cortex_code_scan:
