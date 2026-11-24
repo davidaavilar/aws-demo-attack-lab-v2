@@ -80,7 +80,7 @@ jobs:
           echo "Head SHA: ${{ github.sha }}"
 
           if git diff --quiet "$BASE_SHA" "${{ github.sha }}" -- "${{ matrix.context }}/" "${{ matrix.dockerfile }}"; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
