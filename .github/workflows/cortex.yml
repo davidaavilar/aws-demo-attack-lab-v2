@@ -14,46 +14,6 @@ env:
     detectChanges: false
 
 jobs:
-  cortex_code_scan:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v2
-    
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 22
-
-    - name: Verify Node.js Version
-      run: node -v
-
-    - name: Download cortexcli
-      run: |
-        set -x
-        crtx_resp=$(curl -s "${CORTEX_API_URL}/public_api/v1/unified-cli/releases/download-link?os=linux&architecture=amd64" \
-          -H "x-xdr-auth-id: ${CORTEX_API_KEY_ID}" \
-          -H "Authorization: ${CORTEX_API_KEY}")
-        crtx_url=$(echo $crtx_resp | jq -r ".signed_url")
-        crtx_file=$(echo $crtx_resp | jq -r ".file_name")
-        curl -o $crtx_file $crtx_url 
-        chmod +x cortexcli
-        ./cortexcli --version | base64
-
-    - name: Run Cortex CLI Code Scan
-      run: |
-        ./cortexcli \
-          --api-base-url "${CORTEX_API_URL}" \
-          --api-key "${CORTEX_API_KEY}" \
-          --api-key-id "${CORTEX_API_KEY_ID}" \
-          code scan \
-          --directory "${{github.workspace}}" \
-          --repo-id "${{github.repository}}" \
-          --branch "${{github.ref_name}}" \
-          --source "GITHUB_ACTIONS" \
-          --create-repo-if-missing
-
   docker_build:
     permissions:
       contents: read
@@ -64,18 +24,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # - name: app-debian
-          #   context: ./app-debian
-          #   dockerfile: ./app-debian/Dockerfile
-          #   image: davidaavilar/debian:13
-          # - name: app-alpaquita
-          #   context: ./app-alpaquita
-          #   dockerfile: ./app-alpaquita/Dockerfile
-          #   image: davidaavilar/alpaquita
+          - name: app-debian
+            context: ./app-debian
+            dockerfile: ./app-debian/Dockerfile
+            image: davidaavilar/debian:13
+          - name: app-alpaquita
+            context: ./app-alpaquita
+            dockerfile: ./app-alpaquita/Dockerfile
+            image: davidaavilar/alpaquita
           - name: app-debian17
             context: ./app-debian17
             dockerfile: ./app-debian17/Dockerfile
-            image: davidaavilar/debian:17
+            image: davidaavilar/openjdk-hardened:17-debian13
           - name: app-alpaquita17
             context: ./app-alpaquita17
             dockerfile: ./app-alpaquita17/Dockerfile
@@ -83,7 +43,7 @@ jobs:
           - name: app-debian21
             context: ./app-debian21
             dockerfile: ./app-debian21/Dockerfile
-            image: davidaavilar/debian:21
+            image: davidaavilar/openjdk-hardened:21-debian13
           - name: app-alpaquita21
             context: ./app-alpaquita21
             dockerfile: ./app-alpaquita21/Dockerfile
@@ -91,7 +51,7 @@ jobs:
           - name: app-debian25
             context: ./app-debian25
             dockerfile: ./app-debian25/Dockerfile
-            image: davidaavilar/debian:25
+            image: davidaavilar/openjdk-hardened:25-debian13
           - name: app-alpaquita25
             context: ./app-alpaquita25
             dockerfile: ./app-alpaquita25/Dockerfile
@@ -170,14 +130,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # - name: app-debian
-          #   context: ./app-debian
-          #   dockerfile: ./app-debian/Dockerfile
-          #   image: davidaavilar/debian:13
-          # - name: app-alpaquita
-          #   context: ./app-alpaquita
-          #   dockerfile: ./app-alpaquita/Dockerfile
-          #   image: davidaavilar/alpaquita
+          - name: app-debian
+            context: ./app-debian
+            dockerfile: ./app-debian/Dockerfile
+            image: davidaavilar/debian:13
+          - name: app-alpaquita
+            context: ./app-alpaquita
+            dockerfile: ./app-alpaquita/Dockerfile
+            image: davidaavilar/alpaquita
           - name: app-debian17
             context: ./app-debian17
             dockerfile: ./app-debian17/Dockerfile
@@ -247,80 +207,80 @@ jobs:
       - name: Skip scan
         if: steps.check_tar.outputs.exists != 'true'
         run: echo "No tar found for ${{ matrix.name }}, skipping."
-  docker_push:
-    needs: docker_scan_cortex_cloud
-    if: needs.docker_build.outputs.changed == 'true' && github.event_name != 'pull_request'
-    permissions:
-      contents: read
-      security-events: write
-      actions: read
-    runs-on: ubuntu-22.04
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          # - name: app-debian
-          #   context: ./app-debian
-          #   dockerfile: ./app-debian/Dockerfile
-          #   image: davidaavilar/debian:13
-          # - name: app-alpaquita
-          #   context: ./app-alpaquita
-          #   dockerfile: ./app-alpaquita/Dockerfile
-          #   image: davidaavilar/alpaquita
-          - name: app-debian17
-            context: ./app-debian17
-            dockerfile: ./app-debian17/Dockerfile
-            image: davidaavilar/debian:17
-          - name: app-alpaquita17
-            context: ./app-alpaquita17
-            dockerfile: ./app-alpaquita17/Dockerfile
-            image: davidaavilar/alpaquita17
-          - name: app-debian21
-            context: ./app-debian21
-            dockerfile: ./app-debian21/Dockerfile
-            image: davidaavilar/debian:21
-          - name: app-alpaquita21
-            context: ./app-alpaquita21
-            dockerfile: ./app-alpaquita21/Dockerfile
-            image: davidaavilar/alpaquita21
-          - name: app-debian25
-            context: ./app-debian25
-            dockerfile: ./app-debian25/Dockerfile
-            image: davidaavilar/debian:25
-          - name: app-alpaquita25
-            context: ./app-alpaquita25
-            dockerfile: ./app-alpaquita25/Dockerfile
-            image: davidaavilar/alpaquita25
-    steps:
-      - name: Download image artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ matrix.name }}-image
-          path: /tmp
-        continue-on-error: true
-      - name: Check tar
-        id: check_tar
-        run: |
-          if [ -f "/tmp/${{ matrix.name }}.tar" ]; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-          fi
-      - name: Set up Docker Buildx
-        if: steps.check_tar.outputs.exists == 'true'
-        uses: docker/setup-buildx-action@v3
-      - name: Load image
-        if: steps.check_tar.outputs.exists == 'true'
-        run: docker load -i /tmp/${{ matrix.name }}.tar
-      - name: Log in to Docker Hub
-        if: steps.check_tar.outputs.exists == 'true'
-        uses: docker/login-action@v3
-        with:
-          username: ${{ vars.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Tag image
-        if: steps.check_tar.outputs.exists == 'true'
-        run: docker tag local/${{ matrix.name }}:scan ${{ matrix.image }}
-      - name: Push image
-        if: steps.check_tar.outputs.exists == 'true'
-        run: docker push ${{ matrix.image }}
+  # docker_push:
+  #   needs: docker_scan_cortex_cloud
+  #   if: needs.docker_build.outputs.changed == 'true' && github.event_name != 'pull_request'
+  #   permissions:
+  #     contents: read
+  #     security-events: write
+  #     actions: read
+  #   runs-on: ubuntu-22.04
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include:
+  #         - name: app-debian
+  #           context: ./app-debian
+  #           dockerfile: ./app-debian/Dockerfile
+  #           image: davidaavilar/debian:13
+  #         - name: app-alpaquita
+  #           context: ./app-alpaquita
+  #           dockerfile: ./app-alpaquita/Dockerfile
+  #           image: davidaavilar/alpaquita
+  #         - name: app-debian17
+  #           context: ./app-debian17
+  #           dockerfile: ./app-debian17/Dockerfile
+  #           image: davidaavilar/debian:17
+  #         - name: app-alpaquita17
+  #           context: ./app-alpaquita17
+  #           dockerfile: ./app-alpaquita17/Dockerfile
+  #           image: davidaavilar/alpaquita17
+  #         - name: app-debian21
+  #           context: ./app-debian21
+  #           dockerfile: ./app-debian21/Dockerfile
+  #           image: davidaavilar/debian:21
+  #         - name: app-alpaquita21
+  #           context: ./app-alpaquita21
+  #           dockerfile: ./app-alpaquita21/Dockerfile
+  #           image: davidaavilar/alpaquita21
+  #         - name: app-debian25
+  #           context: ./app-debian25
+  #           dockerfile: ./app-debian25/Dockerfile
+  #           image: davidaavilar/debian:25
+  #         - name: app-alpaquita25
+  #           context: ./app-alpaquita25
+  #           dockerfile: ./app-alpaquita25/Dockerfile
+  #           image: davidaavilar/alpaquita25
+  #   steps:
+  #     - name: Download image artifact
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: ${{ matrix.name }}-image
+  #         path: /tmp
+  #       continue-on-error: true
+  #     - name: Check tar
+  #       id: check_tar
+  #       run: |
+  #         if [ -f "/tmp/${{ matrix.name }}.tar" ]; then
+  #           echo "exists=true" >> "$GITHUB_OUTPUT"
+  #         else
+  #           echo "exists=false" >> "$GITHUB_OUTPUT"
+  #         fi
+  #     - name: Set up Docker Buildx
+  #       if: steps.check_tar.outputs.exists == 'true'
+  #       uses: docker/setup-buildx-action@v3
+  #     - name: Load image
+  #       if: steps.check_tar.outputs.exists == 'true'
+  #       run: docker load -i /tmp/${{ matrix.name }}.tar
+  #     - name: Log in to Docker Hub
+  #       if: steps.check_tar.outputs.exists == 'true'
+  #       uses: docker/login-action@v3
+  #       with:
+  #         username: ${{ vars.DOCKER_USERNAME }}
+  #         password: ${{ secrets.DOCKER_PASSWORD }}
+  #     - name: Tag image
+  #       if: steps.check_tar.outputs.exists == 'true'
+  #       run: docker tag local/${{ matrix.name }}:scan ${{ matrix.image }}
+  #     - name: Push image
+  #       if: steps.check_tar.outputs.exists == 'true'
+  #       run: docker push ${{ matrix.image }}
