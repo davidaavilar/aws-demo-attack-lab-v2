@@ -192,6 +192,10 @@ jobs:
           crtx_url=$(echo "$crtx_resp" | jq -r '.signed_url')
           curl -fsSL -o cortexcli "$crtx_url"
           chmod +x cortexcli
+       - name: Version cortexcli
+         if: steps.check_tar.outputs.exists == 'true'
+         run: |
+          ./cortexcli --version
       - name: Scan local image with Cortex CLI
         continue-on-error: true
         if: steps.check_tar.outputs.exists == 'true'
