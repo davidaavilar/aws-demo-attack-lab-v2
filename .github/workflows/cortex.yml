@@ -192,10 +192,27 @@ jobs:
           crtx_url=$(echo "$crtx_resp" | jq -r '.signed_url')
           curl -fsSL -o cortexcli "$crtx_url"
           chmod +x cortexcli
-      - name: Version cortexcli
+          
+      - name: Check Prerequisites
         if: steps.check_tar.outputs.exists == 'true'
         run: |
+          set -euo pipefail
+
+          echo "===== Cortex CLI Version ====="
           ./cortexcli --version
+
+          echo "===== Hyperscan Installation ====="
+          dpkg -l | grep -i hyperscan
+
+          echo "===== Image Linux Distribution ====="
+          TAR="/tmp/${{ matrix.name }}.tar"
+          IMAGE_ID=$(tar -xOf "$TAR" manifest.json | jq -r '.[0].Config' | sed 's|.*/||;s|\.json$||')
+          docker load -i "$TAR"
+          CONTAINER_ID=$(docker create "sha256:$IMAGE_ID")
+          trap 'docker rm "$CONTAINER_ID" >/dev/null' EXIT
+          docker cp -L "$CONTAINER_ID":/etc/os-release /tmp/os-release
+          cat /tmp/os-release
+
       - name: Scan local image with Cortex CLI
         continue-on-error: true
         if: steps.check_tar.outputs.exists == 'true'
@@ -211,6 +228,10 @@ jobs:
       - name: Skip scan
         if: steps.check_tar.outputs.exists != 'true'
         run: echo "No tar found for ${{ matrix.name }}, skipping."
+
+
+
+        
   # docker_push:
   #   needs: docker_scan_cortex_cloud
   #   if: needs.docker_build.outputs.changed == 'true' && github.event_name != 'pull_request'
