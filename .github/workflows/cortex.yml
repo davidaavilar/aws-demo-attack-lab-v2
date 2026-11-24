@@ -192,7 +192,7 @@ jobs:
           crtx_url=$(echo "$crtx_resp" | jq -r '.signed_url')
           curl -fsSL -o cortexcli "$crtx_url"
           chmod +x cortexcli
-          
+
       - name: Check Prerequisites
         if: steps.check_tar.outputs.exists == 'true'
         run: |
@@ -202,7 +202,7 @@ jobs:
           ./cortexcli --version
 
           echo "===== Hyperscan Installation ====="
-          dpkg -l | grep -i hyperscan
+          dpkg-query -W -f='Package: ${Package}\nStatus: ${Status}\nVersion: ${Version}\nArchitecture: ${Architecture}\n' libhyperscan5
 
           echo "===== Image Linux Distribution ====="
           TAR="/tmp/${{ matrix.name }}.tar"
